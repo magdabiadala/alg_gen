@@ -71,10 +71,22 @@ def crossover(ind1, ind2):
     # print(new2)
     return new1, new2
 
-generation = first_gen()
-# print(generation)
+def mutation(ind):
+    # print(ind)
+    locuses = list(range(1,n))
+    locus1 = random.choice(locuses)
+    locuses.remove(locus1)
+    locus2 = random.choice(locuses)
+    # print(locus1)
+    # print(locus2)
+    x = ind[locus1]
+    ind[locus1] = ind[locus2]
+    ind[locus2] = x
+    # print(ind)
 
+# generation = first_gen()
+# print(generation)
 # for i in range(n-1):
 #     print(full_dist(generation[i]))
-
-print(crossover(generation[0],generation[1]))
+# print(crossover(generation[0],generation[1]))
+# mutation(generation[0])
