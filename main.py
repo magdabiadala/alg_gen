@@ -43,30 +43,38 @@ def first_gen():
 
 def crossover(ind1, ind2):
     cut = random.randint(2,n-2)
-    print(cut)
     new1 = [0]
-    new2 = new1
-    # for i in range(cut+1):
-    #     new1.append(0)
-    # new2 = new1
-    # print(new1)
-    # print(new2)
-### jest źle
+    new2 = [0]
+    # print(ind1)
+    # print(ind2)
+    # print(cut)
     for i in range(1,n):
+        #gdy znajdziemy wszystkie szukane liczby zanim przejrzymy całą ind2
         if len(new1) == cut+1:
             break
         elif ind1[i] in islice(ind2, cut+1, None):
             continue
         else:
             new1.append(ind1[i])
-    print(new1)
+    for i in range(1,n):
+        if len(new2) == cut+1:
+            break
+        elif ind2[i] in islice(ind1, cut+1, None):
+            continue
+        else:
+            new2.append(ind2[i])
+    slice2 = ind2[slice(cut+1, n+1)]
+    slice1 = ind1[slice(cut+1, n+1)]
+    new1 = new1 + slice2
+    new2 = new2 + slice1
+    # print(new1)
+    # print(new2)
+    return new1, new2
 
-
-
-print(first_gen())
 generation = first_gen()
+# print(generation)
 
-for i in range(n-1):
-    print(full_dist(generation[i]))
+# for i in range(n-1):
+#     print(full_dist(generation[i]))
 
-crossover(generation[0],generation[1])
+print(crossover(generation[0],generation[1]))
