@@ -84,9 +84,41 @@ def mutation(ind):
     ind[locus2] = x
     # print(ind)
 
-# generation = first_gen()
-# print(generation)
-# for i in range(n-1):
-#     print(full_dist(generation[i]))
+def roulette(generation):
+    # print('pokolenie: ', generation)
+    distances = []
+    for i in range(n-1):
+        a = full_dist(generation[i])
+        distances.append(a)
+    # print(distances)
+    roulette_tab = reciprocal(distances)
+    survivors = []
+    for i in range(6):
+        r = random.random()
+        j = 0
+        while r > roulette_tab[j]:
+            j += 1
+        #może by się przydało coś na wypadek wylosowania 1 gdy nie ma jej w tablicy akurat
+        if survivors.count(generation[j]) == 0:
+            survivors.append(generation[j])
+    return survivors
+
+
+def reciprocal(distances):
+    # print('odległości: ', distances)
+    maximum = max(distances)
+    minimum = min(distances)
+    reciprocal = [maximum-x+minimum for x in distances]
+    # print('odwrócone: ',reciprocal)
+    sum2 = sum(reciprocal)
+    normalized = [x/sum2 for x in reciprocal]
+    # print('znormalizowane: ',normalized)
+    for i in range(1,n-1):
+        normalized[i] += normalized[i-1]
+    return normalized
+
+
+generation = first_gen()
+print(roulette(generation))
 # print(crossover(generation[0],generation[1]))
 # mutation(generation[0])
