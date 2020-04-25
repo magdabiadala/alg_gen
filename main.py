@@ -13,6 +13,12 @@ Zielona_Gora = [51.9383777,15.5050408]
 cities = [Poznan, Warszawa, Gdansk, Krakow, Wroclaw, Torun, Zielona_Gora]
 ### liczba miast
 n = 7
+### prawdopodobieństwo mutacji
+mutation_prob = 0.03
+### ilość osobników w pokoleniu
+size = 10
+### liczba pokoleń
+iterations = 20
 
 def distance(a,b):
     x = cities[a]
@@ -29,9 +35,9 @@ def full_dist(individual):
 
 def first_gen():
     gen1 = []
-    for i in range(n-1):
-### potrzebna zmiana do większej ilości miast
-        t = [1,2,3,4,5,6]
+    for i in range(size):
+        t = list(range(1,n))
+        # print(t)
         individual = [0]
         while len(t) > 0:
             r = random.choice(t)
@@ -82,25 +88,26 @@ def mutation(ind):
     x = ind[locus1]
     ind[locus1] = ind[locus2]
     ind[locus2] = x
-    # print(ind)
+    return ind
 
 def roulette(generation):
     # print('pokolenie: ', generation)
     distances = []
-    for i in range(n-1):
+    for i in range(size):
         a = full_dist(generation[i])
         distances.append(a)
-    # print(distances)
+    # print('dystanse: ',distances)
     roulette_tab = reciprocal(distances)
+    # print('ruletka: ',roulette_tab)
     survivors = []
-    for i in range(6):
+    for i in range(size):
         r = random.random()
         j = 0
         while r > roulette_tab[j]:
             j += 1
         #może by się przydało coś na wypadek wylosowania 1 gdy nie ma jej w tablicy akurat
-        if survivors.count(generation[j]) == 0:
-            survivors.append(generation[j])
+        survivors.append(generation[j])
+    # print('przetrwali: ',survivors)
     return survivors
 
 
@@ -113,12 +120,43 @@ def reciprocal(distances):
     sum2 = sum(reciprocal)
     normalized = [x/sum2 for x in reciprocal]
     # print('znormalizowane: ',normalized)
-    for i in range(1,n-1):
+    for i in range(1,size):
         normalized[i] += normalized[i-1]
+    # print('ruletka: ', normalized)
     return normalized
 
 
 generation = first_gen()
-print(roulette(generation))
-# print(crossover(generation[0],generation[1]))
-# mutation(generation[0])
+print('1 generacja: ',generation)
+#to by wypadało zmienić bo brzydkie!
+local_minimum = 50
+for i in range(size):
+    a = full_dist(generation[i])
+    if a < local_minimum:
+        local_minimum = a
+for i in range(iterations):
+    print('pokolenie: ', i)
+    # print(generation)
+    survivors = roulette(generation)
+    # print('przetrwali: ',survivors)
+    descendants = []
+    for j in range(0,size,2):
+        pair = crossover(survivors[j],survivors[j+1])
+        for a in pair:
+            descendants.append(a)
+    for j in range(size):
+        if random.random() <= mutation_prob:
+            # print('MUTACJA!!!')
+            mutation(descendants[j])
+    # print('potomkowie: ', descendants)
+    #to by wypadało zmienić bo brzydkie!
+    x = 50
+    for j in range(size):
+        a = full_dist(descendants[j])
+        if a < x:
+            x = a
+    print('minimum: ',x)
+    if x < local_minimum:
+        local_minimum = x
+    generation = descendants
+print('minimum lokalne: ', local_minimum)
