@@ -12,101 +12,101 @@ Torun = [53.0102721,18.6048094]
 Zielona_Gora = [51.9383777,15.5050408]
 cities = [Poznan, Warszawa, Gdansk, Krakow, Wroclaw, Torun, Zielona_Gora]
 ### liczba miast
-n = 7
+number_of_cities = len(cities)
 ### prawdopodobieństwo mutacji
-mutation_prob = 0.03
+mutation_prob = 0.02
 ### ilość osobników w pokoleniu
-size = 10
+generation_size = 10
 ### liczba pokoleń
-iterations = 20
+number_of_generations = 50
 
 def distance(a,b):
-    x = cities[a]
-    y = cities[b]
-    d = math.sqrt((x[0]-y[0])**2 + (x[1]-y[1])**2)
-    return d
+    city_a = cities[a]
+    city_b = cities[b]
+    dist = math.sqrt((city_a[0]-city_b[0])**2 + (city_a[1]-city_b[1])**2)
+    return dist
 
 def full_dist(individual):
-    d = 0
-    list = individual
-    for i in range(n):
-        d += distance(list[i],list[i+1])
-    return d
+    full_distance = 0
+    for city in range(number_of_cities):
+        full_distance += distance(individual[city],individual[city+1])
+    return full_distance
 
 def first_gen():
-    gen1 = []
-    for i in range(size):
-        t = list(range(1,n))
-        # print(t)
+    first_generation = []
+    for individual in range(generation_size):
+        list_of_numbers = list(range(1,number_of_cities))
+        # print(list_of_numbers)
         individual = [0]
-        while len(t) > 0:
-            r = random.choice(t)
-            individual.append(r)
-            t.remove(r)
+        while len(list_of_numbers) > 0:
+            number = random.choice(list_of_numbers)
+            individual.append(number)
+            list_of_numbers.remove(number)
         individual.append(0)
-        gen1.append(individual)
-    return gen1
+        first_generation.append(individual)
+    return first_generation
 
-def crossover(ind1, ind2):
-    cut = random.randint(2,n-2)
+def crossover(individual1, individual2):
+    cut = random.randint(2,number_of_cities-2)
     new1 = [0]
     new2 = [0]
-    # print(ind1)
-    # print(ind2)
+    # print(individual1)
+    # print(individual2)
     # print(cut)
-    for i in range(1,n):
-        #gdy znajdziemy wszystkie szukane liczby zanim przejrzymy całą ind2
+
+    for city in range(1,number_of_cities):
+        #gdy znajdziemy wszystkie szukane liczby zanim przejrzymy całą individual2
         if len(new1) == cut+1:
             break
-        elif ind1[i] in islice(ind2, cut+1, None):
+        elif individual1[city] in islice(individual2, cut+1, None):
             continue
         else:
-            new1.append(ind1[i])
-    for i in range(1,n):
+            new1.append(individual1[city])
+    for city in range(1,number_of_cities):
         if len(new2) == cut+1:
             break
-        elif ind2[i] in islice(ind1, cut+1, None):
+        elif individual2[city] in islice(individual1, cut+1, None):
             continue
         else:
-            new2.append(ind2[i])
-    slice2 = ind2[slice(cut+1, n+1)]
-    slice1 = ind1[slice(cut+1, n+1)]
+            new2.append(individual2[city])
+    slice2 = individual2[slice(cut+1, number_of_cities+1)]
+    slice1 = individual1[slice(cut+1, number_of_cities+1)]
     new1 = new1 + slice2
     new2 = new2 + slice1
     # print(new1)
     # print(new2)
     return new1, new2
 
-def mutation(ind):
-    # print(ind)
-    locuses = list(range(1,n))
-    locus1 = random.choice(locuses)
-    locuses.remove(locus1)
-    locus2 = random.choice(locuses)
+def mutation(individual):
+    # print(individual)
+    possible_locuses = list(range(1,number_of_cities))
+    locus1 = random.choice(possible_locuses)
+    possible_locuses.remove(locus1)
+    locus2 = random.choice(possible_locuses)
     # print(locus1)
     # print(locus2)
-    x = ind[locus1]
-    ind[locus1] = ind[locus2]
-    ind[locus2] = x
-    return ind
+    # zamiana 2 genów
+    gene = individual[locus1]
+    individual[locus1] = individual[locus2]
+    individual[locus2] = gene
+    return individual
 
 def roulette(generation):
     # print('pokolenie: ', generation)
     distances = []
-    for i in range(size):
-        a = full_dist(generation[i])
-        distances.append(a)
+    for individual in range(generation_size):
+        individual_distance = full_dist(generation[individual])
+        distances.append(individual_distance)
     # print('dystanse: ',distances)
     roulette_tab = reciprocal(distances)
     # print('ruletka: ',roulette_tab)
     survivors = []
-    for i in range(size):
-        r = random.random()
-        j = 0
-        while r > roulette_tab[j]:
-            j += 1
-        #może by się przydało coś na wypadek wylosowania 1 gdy nie ma jej w tablicy akurat
-        survivors.append(generation[j])
+    for individual in range(generation_size):
+        random_number = random.random()
+        interval_number = 0
+        while random_number > roulette_tab[interval_number]:
+            interval_number += 1
+        survivors.append(generation[interval_number])
     # print('przetrwali: ',survivors)
     return survivors
 
@@ -115,48 +115,67 @@ def reciprocal(distances):
     # print('odległości: ', distances)
     maximum = max(distances)
     minimum = min(distances)
+
+    ### TĄ CZĘŚĆ NALEŻY ZMIENIĆ ###
+
     reciprocal = [maximum-x+minimum for x in distances]
     # print('odwrócone: ',reciprocal)
-    sum2 = sum(reciprocal)
-    normalized = [x/sum2 for x in reciprocal]
+    sum_of_reciprocal = sum(reciprocal)
+    normalized = [x/sum_of_reciprocal for x in reciprocal]
     # print('znormalizowane: ',normalized)
-    for i in range(1,size):
+
+    ################################
+
+    for i in range(1,generation_size-1):
         normalized[i] += normalized[i-1]
+    # wpisuję 1 ręcznie, bo czasem liczby nie sumowały się idealnie do 1 (niedokładność komputera)
+    normalized[generation_size-1] = 1
     # print('ruletka: ', normalized)
     return normalized
 
 
 generation = first_gen()
 print('1 generacja: ',generation)
-#to by wypadało zmienić bo brzydkie!
-local_minimum = 50
-for i in range(size):
-    a = full_dist(generation[i])
-    if a < local_minimum:
-        local_minimum = a
-for i in range(iterations):
-    print('pokolenie: ', i)
+global_minimum = math.inf
+
+# ta pętla liczy tylko najkrótszy dystans dla pierwszego pokolenia
+for first_gen_individual in range(generation_size):
+    distance_of_individual = full_dist(generation[first_gen_individual])
+    if distance_of_individual < global_minimum:
+        global_minimum = distance_of_individual
+
+#właściwa pętla programu
+for generation_index in range(number_of_generations):
+    print('pokolenie numer: ', generation_index)
     # print(generation)
+
+    #RULETKA
     survivors = roulette(generation)
     # print('przetrwali: ',survivors)
+
+    #KRZYŻOWANIE
     descendants = []
-    for j in range(0,size,2):
-        pair = crossover(survivors[j],survivors[j+1])
-        for a in pair:
-            descendants.append(a)
-    for j in range(size):
+    for individual in range(0,generation_size,2):
+        pair = crossover(survivors[individual],survivors[individual+1])
+        for each in pair:
+            descendants.append(each)
+    # print('potomkowie: ', descendants)
+
+    #MUTACJA
+    for individual in range(generation_size):
         if random.random() <= mutation_prob:
             # print('MUTACJA!!!')
-            mutation(descendants[j])
+            mutation(descendants[individual])
     # print('potomkowie: ', descendants)
-    #to by wypadało zmienić bo brzydkie!
-    x = 50
-    for j in range(size):
-        a = full_dist(descendants[j])
-        if a < x:
-            x = a
-    print('minimum: ',x)
-    if x < local_minimum:
-        local_minimum = x
+
+    # NAJKRÓTSZA TRASA
+    local_minimum = math.inf
+    for each in range(generation_size):
+        specific_distance = full_dist(descendants[each])
+        if specific_distance < local_minimum:
+            local_minimum = specific_distance
+    print('minimum w pokoleniu: ',local_minimum)
+    if local_minimum < global_minimum:
+        global_minimum = local_minimum
     generation = descendants
-print('minimum lokalne: ', local_minimum)
+print('minimum globalne: ', global_minimum)
