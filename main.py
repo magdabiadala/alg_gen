@@ -16,9 +16,9 @@ number_of_cities = len(cities)
 ### prawdopodobieństwo mutacji
 mutation_prob = 0.02
 ### ilość osobników w pokoleniu
-generation_size = 10
+generation_size = 70
 ### liczba pokoleń
-number_of_generations = 50
+number_of_generations = 100
 
 def distance(a,b):
     city_a = cities[a]
@@ -115,12 +115,27 @@ def reciprocal(distances):
     # print('odległości: ', distances)
     maximum = max(distances)
     minimum = min(distances)
+    # print("minimum: ", minimum)
+    # print("maximum: ", maximum)
 
-    ### TĄ CZĘŚĆ NALEŻY ZMIENIĆ ###
+    ### TSTARSZA WERSJA FUNKCJI ###
+    # za słabo promuje najlepsze osobniki
 
-    reciprocal = [maximum-x+minimum for x in distances]
+    # reciprocal = [maximum-x+minimum for x in distances]
     # print('odwrócone: ',reciprocal)
+    # sum_of_reciprocal = sum(reciprocal)
+    # normalized = [x/sum_of_reciprocal for x in reciprocal]
+    # print('znormalizowane: ',normalized)
+
+    ################################
+
+    ######### NOWA WERSJA ##########
+    # zdcydowanie bardziej promuje dobre osobniki
+
+    reciprocal = [maximum-x+1 for x in distances]
     sum_of_reciprocal = sum(reciprocal)
+    # print('odwrócone: ',reciprocal)
+    # print("suma: ", sum_of_reciprocal)
     normalized = [x/sum_of_reciprocal for x in reciprocal]
     # print('znormalizowane: ',normalized)
 
