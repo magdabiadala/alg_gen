@@ -118,7 +118,7 @@ def reciprocal(distances):
     # print("minimum: ", minimum)
     # print("maximum: ", maximum)
 
-    ### TSTARSZA WERSJA FUNKCJI ###
+    ### STARSZA WERSJA FUNKCJI ###
     # za słabo promuje najlepsze osobniki
 
     # reciprocal = [maximum-x+minimum for x in distances]
@@ -138,6 +138,16 @@ def reciprocal(distances):
     # print("suma: ", sum_of_reciprocal)
     normalized = [x/sum_of_reciprocal for x in reciprocal]
     # print('znormalizowane: ',normalized)
+
+    ################################
+
+    ######## WERSJA Z 1/x ##########
+
+    # reciprocal = [1/x for x in distances]
+    # sum_of_reciprocal = sum(reciprocal)
+    # print('odwrócone: ',reciprocal)
+    # print("suma: ", sum_of_reciprocal)
+    # normalized = [(1/x)/sum_of_reciprocal for x in reciprocal]
 
     ################################
 
