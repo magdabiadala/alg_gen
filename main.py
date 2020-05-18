@@ -3,22 +3,24 @@ import random
 from itertools import islice
 
 ### testowy zbiór miast i ich współrzędnych
-Poznan = [52.4082663, 16.9335199]
-Warszawa = [52.2319581,21.0067249]
-Gdansk = [54.347629,18.6452324]
-Krakow = [50.0619474,19.9368564]
-Wroclaw = [51.1089776,17.0326689]
-Torun = [53.0102721,18.6048094]
-Zielona_Gora = [51.9383777,15.5050408]
-cities = [Poznan, Warszawa, Gdansk, Krakow, Wroclaw, Torun, Zielona_Gora]
+# Poznan = [52.4082663, 16.9335199]
+# Warszawa = [52.2319581,21.0067249]
+# Gdansk = [54.347629,18.6452324]
+# Krakow = [50.0619474,19.9368564]
+# Wroclaw = [51.1089776,17.0326689]
+# Torun = [53.0102721,18.6048094]
+# Zielona_Gora = [51.9383777,15.5050408]
+# cities = [Poznan, Warszawa, Gdansk, Krakow, Wroclaw, Torun, Zielona_Gora]
+
 ### liczba miast
-number_of_cities = len(cities)
+### number_of_cities
 ### prawdopodobieństwo mutacji
-mutation_prob = 0.02
+mutation_prob = 0.05
 ### ilość osobników w pokoleniu
-generation_size = 70
+generation_size = 50
 ### liczba pokoleń
-number_of_generations = 100
+number_of_generations = 30000
+
 
 def distance(a,b):
     city_a = cities[a]
@@ -158,9 +160,18 @@ def reciprocal(distances):
     # print('ruletka: ', normalized)
     return normalized
 
+file = open("tsp_100_1", "r")
+number = 0
+cities = []
+number_of_cities = int(file.readline())
+for line in file:
+    coords = line.split()
+    coords = list(map(int, coords))
+    cities.append(coords)
+    number += 1
 
 generation = first_gen()
-print('1 generacja: ',generation)
+# print('1 generacja: ',generation)
 global_minimum = math.inf
 
 # ta pętla liczy tylko najkrótszy dystans dla pierwszego pokolenia
@@ -191,7 +202,7 @@ for generation_index in range(number_of_generations):
         if random.random() <= mutation_prob:
             # print('MUTACJA!!!')
             mutation(descendants[individual])
-    # print('potomkowie: ', descendants)
+    # print('potomkowie po mutacji: ', descendants)
 
     # NAJKRÓTSZA TRASA
     local_minimum = math.inf
