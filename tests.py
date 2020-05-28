@@ -1,6 +1,9 @@
 import math
 import random
 from itertools import islice
+import time
+import statistics as stat
+
 
 ### testowy zbiór miast i ich współrzędnych
 # Poznan = [52.4082663, 16.9335199]
@@ -15,11 +18,13 @@ from itertools import islice
 ### liczba miast
 ### number_of_cities
 ### prawdopodobieństwo mutacji
-mutation_prob = 0.005
+mutation_prob = 0.02
 ### ilość osobników w pokoleniu
-generation_size = 50
+generation_size = 10
 ### liczba pokoleń
-number_of_generations = 30000
+number_of_generations = 10
+### rodzaj ruletki
+rec_fun = False
 
 
 def distance(a,b):
@@ -100,7 +105,7 @@ def roulette(generation):
         individual_distance = full_dist(generation[individual])
         distances.append(individual_distance)
     # print('dystanse: ',distances)
-    roulette_tab = reciprocal(distances)
+    roulette_tab = reciprocal(distances, rec_fun)
     # print('ruletka: ',roulette_tab)
     survivors = []
     for individual in range(generation_size):
@@ -113,7 +118,7 @@ def roulette(generation):
     return survivors
 
 
-def reciprocal(distances):
+def reciprocal(distances, rec_fun):
     # print('odległości: ', distances)
     maximum = max(distances)
     minimum = min(distances)
@@ -134,22 +139,24 @@ def reciprocal(distances):
     ######### NOWA WERSJA ##########
     # zdcydowanie bardziej promuje dobre osobniki
 
-    reciprocal = [maximum-x+1 for x in distances]
-    sum_of_reciprocal = sum(reciprocal)
-    # print('odwrócone: ',reciprocal)
-    # print("suma: ", sum_of_reciprocal)
-    normalized = [x/sum_of_reciprocal for x in reciprocal]
+    if rec_fun == True:
+        reciprocal = [maximum-x+1 for x in distances]
+        sum_of_reciprocal = sum(reciprocal)
+        # print('odwrócone: ',reciprocal)
+        # print("suma: ", sum_of_reciprocal)
+        normalized = [x/sum_of_reciprocal for x in reciprocal]
     # print('znormalizowane: ',normalized)
 
     ################################
 
     ######## WERSJA Z 1/x ##########
 
-    # reciprocal = [1/x for x in distances]
-    # sum_of_reciprocal = sum(reciprocal)
-    # print('odwrócone: ',reciprocal)
-    # print("suma: ", sum_of_reciprocal)
-    # normalized = [(1/x)/sum_of_reciprocal for x in reciprocal]
+    else:
+        reciprocal = [1/x for x in distances]
+        sum_of_reciprocal = sum(reciprocal)
+        # print('odwrócone: ',reciprocal)
+        # print("suma: ", sum_of_reciprocal)
+        normalized = [(1/x)/sum_of_reciprocal for x in reciprocal]
 
     ################################
 
@@ -160,6 +167,54 @@ def reciprocal(distances):
     # print('ruletka: ', normalized)
     return normalized
 
+def gen_alg():
+    generation = first_gen()
+    # print('1 generacja: ',generation)
+    global_minimum = math.inf
+
+    # ta pętla liczy tylko najkrótszy dystans dla pierwszego pokolenia
+    for first_gen_individual in range(generation_size):
+        distance_of_individual = full_dist(generation[first_gen_individual])
+        if distance_of_individual < global_minimum:
+            global_minimum = distance_of_individual
+
+    #właściwa pętla programu
+    for generation_index in range(number_of_generations):
+        # print('pokolenie numer: ', generation_index)
+        # print(generation)
+
+        #RULETKA
+        survivors = roulette(generation)
+        # print('przetrwali: ',survivors)
+
+        #KRZYŻOWANIE
+        descendants = []
+        for individual in range(0,generation_size,2):
+            pair = crossover(survivors[individual],survivors[individual+1])
+            for each in pair:
+                descendants.append(each)
+        # print('potomkowie: ', descendants)
+
+        #MUTACJA
+        for individual in range(generation_size):
+            if random.random() <= mutation_prob:
+                # print('MUTACJA!!!')
+                mutation(descendants[individual])
+        # print('potomkowie po mutacji: ', descendants)
+
+        # NAJKRÓTSZA TRASA
+        local_minimum = math.inf
+        for each in range(generation_size):
+            specific_distance = full_dist(descendants[each])
+            if specific_distance < local_minimum:
+                local_minimum = specific_distance
+        # print('minimum w pokoleniu: ',local_minimum)
+        if local_minimum < global_minimum:
+            global_minimum = local_minimum
+        generation = descendants
+    return global_minimum
+
+# otwarcie plików z współrzędnymi i wynikami
 file = open("tsp_100_1", "r")
 number = 0
 cities = []
@@ -169,49 +224,39 @@ for line in file:
     coords = list(map(int, coords))
     cities.append(coords)
     number += 1
+file_results = open("text_results.txt", "a")
 
-generation = first_gen()
-# print('1 generacja: ',generation)
-global_minimum = math.inf
+# listy parametrów do przetestowania
+mut = [0.06]
+size = [60, 80]
+iters = [20, 40, 80, 160, 320]
+rec = [True]
+# mut = [0.01, 0.02]
+# size = [10, 20]
+# iters = [5, 10]
+# liczba testów w każdym z warunków
+num_of_tests = 50
+test_id = 1
 
-# ta pętla liczy tylko najkrótszy dystans dla pierwszego pokolenia
-for first_gen_individual in range(generation_size):
-    distance_of_individual = full_dist(generation[first_gen_individual])
-    if distance_of_individual < global_minimum:
-        global_minimum = distance_of_individual
-
-#właściwa pętla programu
-for generation_index in range(number_of_generations):
-    print('pokolenie numer: ', generation_index)
-    # print(generation)
-
-    #RULETKA
-    survivors = roulette(generation)
-    # print('przetrwali: ',survivors)
-
-    #KRZYŻOWANIE
-    descendants = []
-    for individual in range(0,generation_size,2):
-        pair = crossover(survivors[individual],survivors[individual+1])
-        for each in pair:
-            descendants.append(each)
-    # print('potomkowie: ', descendants)
-
-    #MUTACJA
-    for individual in range(generation_size):
-        if random.random() <= mutation_prob:
-            # print('MUTACJA!!!')
-            mutation(descendants[individual])
-    # print('potomkowie po mutacji: ', descendants)
-
-    # NAJKRÓTSZA TRASA
-    local_minimum = math.inf
-    for each in range(generation_size):
-        specific_distance = full_dist(descendants[each])
-        if specific_distance < local_minimum:
-            local_minimum = specific_distance
-    print('minimum w pokoleniu: ',local_minimum)
-    if local_minimum < global_minimum:
-        global_minimum = local_minimum
-    generation = descendants
-print('minimum globalne: ', global_minimum)
+for d in range(len(rec)):
+    rec_fun = rec[d]
+    for a in range(len(mut)):
+        mutation_prob = mut[a]
+        for b in range(len(size)):
+            generation_size = size[b]
+            for c in range(len(iters)):
+                number_of_generations = iters[c]
+                print("test numer: ", test_id)
+                file_results.write(str(mutation_prob) + "," + str(generation_size) + "," + str(number_of_generations) + "," + str(rec_fun) + ",")
+                for e in range(num_of_tests):
+                    exec_times = []
+                    best_individuals = []
+                    start_time = time.time()
+                    best = gen_alg()
+                    exec_times.append(time.time() - start_time)
+                    best_individuals.append(best)
+                file_results.write(str(stat.mean(best_individuals)) + ",")
+                file_results.write(str(stat.median(best_individuals)) + ",")
+                file_results.write(str(stat.mean(exec_times)) + ",\n")
+                test_id += 1
+file_results.close()
